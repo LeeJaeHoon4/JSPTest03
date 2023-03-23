@@ -68,10 +68,11 @@ public class FrontController extends HttpServlet {
 //		/memo/list 로 요청이 발생 했을때 이 요청을 처리하는 비즈니스로직
 		// 비즈니스 로직 : Service영역
 		String path = null;
+		String sql = null;
+		PreparedStatement pstmt =null;
 		if(uri.contains("/memo/list")) {
 			List<MemoDTO> list = new ArrayList<>();
-		String sql ="select * from memo";
-		PreparedStatement pstmt =null;
+		 sql ="select * from memo where 1=1 order by no desc";
 		ResultSet rs = null;
 		try {
 			 conn = ds.getConnection();
@@ -105,7 +106,36 @@ public class FrontController extends HttpServlet {
 				request.setAttribute("list", list);
 				//응답할 페이지로 경로 설정해서 넘김
 				path = "/WEB-INF/view/memo/list.jsp";
-		}//if문 끝
+		}//if문끝
+		else if(uri.contains("/memo/write")) {
+			path = "/WEB-INF/view/memo/write.jsp";
+		}//write page로 넘기기
+		else if(uri.contains("/memo/new")) {//메모 저장버튼 클릭시 실행
+			request.setCharacterEncoding("UTF-8");//한글 인코딩
+			String writer = request.getParameter("writer");
+			String content = request.getParameter("content");
+			try {
+				conn =ds.getConnection();
+				sql = "insert into memo values(seq_memo.nextval,?,?,systimestamp,systimestamp)";
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1,content);
+				pstmt.setString(2, writer);
+				pstmt.executeUpdate();
+				System.out.println("메모 저장 완료");
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}finally {
+				try {if(pstmt!=null)pstmt.close();} catch (SQLException e) {}
+				try {if(conn!=null)conn.close();} catch (SQLException e) {}
+				
+			}//try문 끝
+			//저장이 완료되면 list페이지로 리턴
+			//path = "/WEB-INF/views/list.jsp";<< 코드가 위에 list인 경우 코드가 중복 되기 때문에
+			//response 객체의 sendRedirect("주소명") 기능을 사용한다.
+			response.sendRedirect("./list");
+			return;
+			}//메모 저장 끝
 		
 		
 		if(path != null)

@@ -13,6 +13,8 @@
 
 <a href="<%=request.getContextPath() %>/">HOME</a>
 	<h1>메모 리스트 페이지 입니다.</h1>
+	<a href="<%= request.getContextPath()%>/memo/write">메모 글 쓰기</a>
+	<hr>
 	<table>
 		<thead>
 			<tr> 
